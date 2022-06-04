@@ -8,7 +8,8 @@ use clap::Parser;
 use log::info;
 use url::Url;
 
-mod atom_rss;
+mod syndication;
+mod rss_atom;
 
 const NAME: &str = "rssg";
 const AUTHOR: &str = "github.com/lquenti";
@@ -74,7 +75,7 @@ fn main() {
 
     for html in xs {
         // TODO Error handling
-        let feed = atom_rss::Feed::from_str(&html).unwrap();
+        let feed = rss_atom::Feed::from_str(&html).unwrap();
         println!("{:?}", feed);
     }
 }

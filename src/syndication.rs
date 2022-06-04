@@ -2,6 +2,8 @@
  * Mainly adapted from https://github.com/rust-syndication/syndication/blob/master/src/lib.rs
  * (but they dont seem to update the dependencies on either rss or atom...)
  *
+ * See atom_rss for the higher level wrapper
+ *
  * Copyright (c) 2022 Lars Quentin, 2015 The rust-syndication Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,8 +28,6 @@
 
 use std::str::FromStr;
 
-use log::warn;
-
 #[derive(Debug)]
 pub enum Feed {
     Atom(atom_syndication::Feed),
@@ -41,11 +41,10 @@ impl FromStr for Feed {
         if let Ok(feed) = atom_syndication::Feed::from_str(s) {
             return Ok(Feed::Atom(feed));
         }
-        warn!("{} was not a Atom feed. Trying RSS now...", s);
         if let Ok(feed) = rss::Channel::from_str(s) {
             return Ok(Feed::RSS(feed));
         }
-        log::error!("{} was not a Atom or RSS feed!", s);
+        log::error!("Could not parse feed");
         Err("Could not parse feed")
     }
 }
