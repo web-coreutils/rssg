@@ -10,7 +10,7 @@ use url::Url;
 const NAME: &str = "rssg";
 const AUTHOR: &str = "github.com/lquenti";
 const VERSION: &str = "0.1";
-const ABOUT: &str = "A zero dependency single binary static site generator for RSS/Atom feeds";
+const ABOUT: &str = "A (nearly) zero dependency single binary static site generator for RSS/Atom feeds";
 
 #[derive(Parser, Debug)]
 #[clap(name=NAME, author=AUTHOR, version=VERSION,about=ABOUT,long_about=None)]
@@ -41,15 +41,31 @@ fn read_urls<P: AsRef<Path>>(filename: P) -> Result<Vec<Url>> {
     Ok(lines)
 }
 
+// TODO make async for performance with a map to futures, which can later be joined
+// (and the logging should be part of the join)
+fn download_url(u : Url) -> Result<String> {
+    Ok(reqwest::blocking::get(u)?.text()?)
+}
+
 fn main() {
     env_logger::init_from_env(env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"));
     info!("Parsing CLI");
-    let Cli {path, outfile, force} = Cli::parse();
+    let Cli {path, ..} = Cli::parse();
 
     info!("Reading URLs");
     let urls = read_urls(path).expect("Could not read url file...");
     info!("{} urls found.", urls.len());
+
+    let mut xs = Vec::new();
     for url in urls {
-        println!("{}", url);
+        info!("Downloading {}", &url);
+        match download_url(url) {
+            Ok(html) => xs.push(html),
+            Err(e) => log::warn!("Download failed with error \"{}\"", e),
+        };
+    }
+    for html in xs {
+        println!("{}", html);
+        println!("---------------------------------------");
     }
 }

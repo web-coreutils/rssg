@@ -14,3 +14,7 @@ Example:
 <URL_TO_RSS_OR_ATOM_FEED>
 ...
 ```
+
+## Dependencies
+- `pkg-config` for reqwest
+- `libssl-dev` for reqwest
