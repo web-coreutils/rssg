@@ -1,11 +1,14 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::str::FromStr;
 use std::path::Path;
 
 use anyhow::Result;
 use clap::Parser;
 use log::info;
 use url::Url;
+
+mod atom_rss;
 
 const NAME: &str = "rssg";
 const AUTHOR: &str = "github.com/lquenti";
@@ -68,8 +71,10 @@ fn main() {
             Err(e) => log::warn!("Download failed with error \"{}\"", e),
         };
     }
+
     for html in xs {
-        println!("{}", html);
-        println!("---------------------------------------");
+        // TODO Error handling
+        let feed = atom_rss::Feed::from_str(&html).unwrap();
+        println!("{:?}", feed);
     }
 }

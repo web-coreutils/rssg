@@ -1,0 +1,3 @@
+https://this-week-in-rust.org/rss.xml
+
+https://this-week-in-rust.org/atom.xml
