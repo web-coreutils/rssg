@@ -1,0 +1,1 @@
+https://this-week-in-rust.org/atom.xml

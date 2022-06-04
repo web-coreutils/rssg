@@ -1,3 +1,8 @@
+use std::fs::File;
+use std::io::{BufRead,BufReader};
+use std::path::Path;
+
+use anyhow::Result;
 use clap::Parser;
 
 const NAME: &str = "rssg";
@@ -18,6 +23,20 @@ struct Cli {
     force: bool,
 }
 
+fn read_lines<P: AsRef<Path>>(filename: P) -> Result<Vec<String>> {
+    let file = File::open(filename)?;
+    let reader = BufReader::new(file);
+
+    let lines: Vec<String> = reader.lines()
+        .filter_map(|l| l.ok())
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    Ok(lines)
+}
+
 fn main() {
     let Cli {path, outfile, force} = Cli::parse();
+    let urls = read_lines(path);
 }
