@@ -4,6 +4,8 @@ use std::path::Path;
 
 use anyhow::Result;
 use clap::Parser;
+use log::info;
+use url::Url;
 
 const NAME: &str = "rssg";
 const AUTHOR: &str = "github.com/lquenti";
@@ -23,20 +25,31 @@ struct Cli {
     force: bool,
 }
 
-fn read_lines<P: AsRef<Path>>(filename: P) -> Result<Vec<String>> {
+// TODO: Log errors if sth isn't parsable
+fn read_urls<P: AsRef<Path>>(filename: P) -> Result<Vec<Url>> {
     let file = File::open(filename)?;
     let reader = BufReader::new(file);
 
-    let lines: Vec<String> = reader.lines()
+    let lines: Vec<Url> = reader.lines()
         .filter_map(|l| l.ok())
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
+        .map(|s| Url::parse(&s))
+        .filter_map(|s| s.ok())
         .collect();
 
     Ok(lines)
 }
 
 fn main() {
+    env_logger::init_from_env(env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"));
+    info!("Parsing CLI");
     let Cli {path, outfile, force} = Cli::parse();
-    let urls = read_lines(path);
+
+    info!("Reading URLs");
+    let urls = read_urls(path).expect("Could not read url file...");
+    info!("{} urls found.", urls.len());
+    for url in urls {
+        println!("{}", url);
+    }
 }
