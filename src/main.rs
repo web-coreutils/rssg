@@ -1,12 +1,13 @@
 use std::fs::File;
-use std::io::{BufRead, BufReader};
-use std::str::FromStr;
+use std::io::{Write, BufRead, BufReader};
 use std::path::Path;
+use std::str::FromStr;
 
 use anyhow::Result;
 use clap::Parser;
 use log::info;
 use url::Url;
+use sailfish::TemplateOnce;
 
 mod syndication;
 mod rss_atom;
@@ -22,12 +23,9 @@ const ABOUT: &str =
 struct Cli {
     /// Path to the newline-seperated list of RSS or Atom feeds
     path: String,
-    /// Where to safe the generated RSS feed
-    #[clap(short, long, default_value_t = String::from("./rss.html"))]
+    /// Where to save the generated feed
+    #[clap(short, long, default_value_t = String::from("./feed.html"))]
     outfile: String,
-    /// Whether to override the current outfile path
-    #[clap(short, long)]
-    force: bool,
 }
 
 // TODO: Log errors if sth isn't parsable
@@ -58,7 +56,7 @@ fn main() {
         env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"),
     );
     info!("Parsing CLI");
-    let Cli { path, .. } = Cli::parse();
+    let Cli { path, outfile } = Cli::parse();
 
     info!("Reading URLs");
     let urls = read_urls(path).expect("Could not read url file...");
@@ -68,14 +66,15 @@ fn main() {
     for url in urls {
         info!("Downloading {}", &url);
         match download_url(url) {
-            Ok(html) => xs.push(html),
+            Ok(xml) => xs.push(xml),
             Err(e) => log::warn!("Download failed with error \"{}\"", e),
         };
     }
 
-    for html in xs {
-        // TODO Error handling
-        let feed = rss_atom::Feed::from_str(&html).unwrap();
-        println!("{:?}", feed);
-    }
+    info!("Generating HTML");
+    // check what happens if file exist bc of force cli
+    // TODO unwrap
+    let mut fp = std::fs::File::create(outfile).unwrap();
+    // TODO join all
+    write!(fp, "{}", rss_atom::Feed::from_str(xs.first().unwrap()).unwrap().render_once().unwrap()).unwrap();
 }

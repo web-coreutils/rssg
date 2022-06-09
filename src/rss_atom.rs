@@ -2,36 +2,60 @@ use std::str::FromStr;
 
 use crate::syndication::Feed as Synfeed;
 
-use url::Url;
+use sailfish::TemplateOnce;
 
+// TODO type me correctly and implement from
 #[derive(Debug)]
 pub struct Entry {
     title: String,
-    updated: String, // TODO Time
-    link: String, // TODO url
-    summary: Option<String> // TODO
+    link: String,
+    icon: String,
+    source_name: String,
+    source_link: String,
 }
 
-#[derive(Debug)]
+impl Entry {
+    // TODO proper lifetimes
+    fn from_atom(f: atom_syndication::Feed) -> Result<Vec<Self>, String> {
+        Ok(f.entries.iter()
+            .map(|atom_syndication::Entry { title, links, .. }| {
+                Entry {
+                    title: title.to_string(),
+                    link: links.first().unwrap().href.clone(),
+                    //icon: f.icon.as_ref().unwrap().to_string(),
+                    icon: String::new(),
+                    source_name: f.title.to_string(),
+                    source_link: f.links.first().unwrap().href.clone(),
+                }
+            }).collect()
+        )
+    }
+
+    fn from_rss(_c: rss::Channel) -> Result<Vec<Self>, String> {
+        Err(String::new())
+    }
+}
+
+#[derive(Debug, TemplateOnce)]
+#[template(path = "feed_template.html")]
 pub struct Feed {
-    pub title: String,
     pub entries: Vec<Entry>,
-    pub updated: String, // TODO fime
+    pub updated: String, // TODO: Maybe change type?
 }
 
 impl Feed {
     fn from_atom(f: atom_syndication::Feed) -> Result<Self, String> {
-        println!("{:?}", f.links());
+        println!("{:?}", &f.links());
         Ok(Feed {
-            title: f.title().to_string(),
-            entries: Vec::new(),
+            updated: f.updated.to_string(),
+            entries: Entry::from_atom(f)?,
         })
     }
 
     fn from_rss(c: rss::Channel) -> Result<Self, String> {
         Ok(Feed {
-            title: c.title().to_string(),
-            entries: Vec::new(),
+            entries: Entry::from_rss(c)?,
+            updated: String::new(),
         })
     }
 }
