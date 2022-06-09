@@ -9,15 +9,15 @@
     <title>RSSG feed</title>
   </head>
   <body>
-    <% for (i, entry) in  entries.iter().enumerate() %>
+    <% for (i, entry) in  entries.iter().enumerate() { %>
     <article>
       <%# TODO: Add icon %>
       <h3>
         <a href="<%= entry.link %>">
           <%= entry.title %>
         </a>
-        from <a href="<%= entry.source_link %>"><%= entry.source_name %></a>
       </h3>
+      from <a href="<%= entry.source_link %>"><%= entry.source_name %></a>
     </article>
     <% } %>
     <footer>
