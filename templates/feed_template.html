@@ -12,6 +12,7 @@
     <% for entry in  entries.iter() { %>
     <article>
       <%# TODO: Add icon %>
+      <%# TODO: use updated %>
       <h3>
         <a href="<%= entry.link %>">
           <%= entry.title %>
@@ -21,7 +22,7 @@
     </article>
     <% } %>
     <footer>
-      Last updated: <%= updated %>
+      Last updated: <%= updated.to_string() %>
     </footer>
   </body>
 </html>
