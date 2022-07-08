@@ -40,7 +40,7 @@ impl Entry {
     }
 
     fn from_rss(_c: rss::Channel) -> Result<Vec<Self>, String> {
-        Err(String::new())
+        todo!()
     }
 }
 
@@ -79,13 +79,7 @@ impl Feed {
     }
 
     fn from_rss(c: rss::Channel) -> Result<Self, String> {
-        Err(String::new())
-        /*
-        Ok(Feed {
-            entries: Entry::from_rss(c)?,
-            updated: FixedDateTime::new(),
-        })
-        */
+        todo!()
     }
 
     // TODO: Maybe less copies
@@ -98,9 +92,8 @@ impl Feed {
         Self {entries: self.entries, updated }
     }
 
-
-    pub fn join_many(xs: &[Self]){
-        let res = xs.iter().reduce(|xs, y| xs.join(y));
+    pub fn join_all(xs: Vec<Self>) -> Option<Self> {
+        xs.into_iter().reduce( |x, y| x.join(y))
     }
 }
 

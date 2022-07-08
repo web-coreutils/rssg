@@ -67,7 +67,7 @@ fn main() {
         info!("Downloading {}", &url);
         match download_url(url) {
             Ok(xml) => xs.push(xml),
-            Err(e) => log::warn!("Download failed with error \"{}\"", e),
+            Err(e) => log::warn!("Download failed with error \"{}\". Skipping.", e),
         };
     }
 
